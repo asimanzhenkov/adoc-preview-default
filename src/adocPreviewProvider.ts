@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { appendLog } from './logger';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Asciidoctor = require('@asciidoctor/core');
@@ -11,10 +12,7 @@ export class AdocPreviewProvider implements vscode.CustomTextEditorProvider {
 
     private debounceTimers = new Map<string, NodeJS.Timeout>();
 
-    constructor(
-        private readonly context: vscode.ExtensionContext,
-        private readonly log: vscode.OutputChannel
-    ) {}
+    constructor(private readonly context: vscode.ExtensionContext) {}
 
     public async resolveCustomTextEditor(
         document: vscode.TextDocument,
@@ -22,7 +20,7 @@ export class AdocPreviewProvider implements vscode.CustomTextEditorProvider {
         _token: vscode.CancellationToken
     ): Promise<void> {
 
-        this.log.appendLine(`[resolveCustomTextEditor] opening: ${document.uri.fsPath}`);
+        appendLog(`[resolveCustomTextEditor] opening: ${document.uri.fsPath}`);
 
         webviewPanel.webview.options = { enableScripts: true };
         webviewPanel.webview.html = this.getHtmlShell(webviewPanel.webview);
@@ -40,7 +38,7 @@ export class AdocPreviewProvider implements vscode.CustomTextEditorProvider {
             if (existing) { clearTimeout(existing); }
 
             const timer = setTimeout(() => {
-                this.log.appendLine(`[live-reload] updating: ${document.uri.fsPath}`);
+                appendLog(`[live-reload] updating: ${document.uri.fsPath}`);
                 this.updatePreview(document, webviewPanel.webview);
                 this.debounceTimers.delete(key);
             }, debounceMs);
@@ -49,10 +47,10 @@ export class AdocPreviewProvider implements vscode.CustomTextEditorProvider {
         });
 
         const messageSubscription = webviewPanel.webview.onDidReceiveMessage(msg => {
-            this.log.appendLine(`[webview->ext] command: ${msg.command}`);
+            appendLog(`[webview->ext] command: ${msg.command}`);
 
             if (msg.command === 'ready') {
-                this.log.appendLine('[webview->ext] ready received, doing initial render');
+                appendLog('[webview->ext] ready received, doing initial render');
                 this.updatePreview(document, webviewPanel.webview);
             }
 
@@ -80,7 +78,7 @@ export class AdocPreviewProvider implements vscode.CustomTextEditorProvider {
             const adocText = document.getText();
             const baseDir = path.dirname(document.uri.fsPath);
 
-            this.log.appendLine(`[updatePreview] converting ${adocText.length} chars, baseDir=${baseDir}`);
+            appendLog(`[updatePreview] converting ${adocText.length} chars, baseDir=${baseDir}`);
 
             const html: string = asciidoctor.convert(adocText, {
                 safe: 'safe',
@@ -92,10 +90,10 @@ export class AdocPreviewProvider implements vscode.CustomTextEditorProvider {
                 }
             });
 
-            this.log.appendLine(`[updatePreview] converted HTML length: ${html.length}`);
+            appendLog(`[updatePreview] converted HTML length: ${html.length}`);
             webview.postMessage({ command: 'updateContent', html });
         } catch (err) {
-            this.log.appendLine(`[updatePreview] ERROR: ${err}`);
+            appendLog(`[updatePreview] ERROR: ${err}`);
             webview.postMessage({
                 command: 'updateContent',
                 html: `<div style="color:var(--vscode-errorForeground);padding:1rem"><b>Render error:</b><pre>${err}</pre></div>`
