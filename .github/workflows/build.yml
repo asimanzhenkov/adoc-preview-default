@@ -36,7 +36,9 @@ jobs:
 
       - name: Read version from package.json
         id: pkg
-        run: echo "version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+        run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('package.json'))['version'])")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Package VSIX
         run: npx vsce package --no-dependencies -o adoc-preview-default-${{ steps.pkg.outputs.version }}.vsix
