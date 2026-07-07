@@ -2,23 +2,25 @@ import * as vscode from 'vscode';
 import { AdocPreviewProvider } from './adocPreviewProvider';
 
 export function activate(context: vscode.ExtensionContext) {
-    const provider = new AdocPreviewProvider(context);
+    // Create OutputChannel inside activate so VS Code registers it properly
+    const log = vscode.window.createOutputChannel('AsciiDoc Preview');
+    context.subscriptions.push(log);
+    log.appendLine('[activate] AsciiDoc Preview extension activated');
 
-    // Register the custom editor provider
+    const provider = new AdocPreviewProvider(context, log);
+
     context.subscriptions.push(
         vscode.window.registerCustomEditorProvider(
             AdocPreviewProvider.viewType,
             provider,
             {
-                webviewOptions: {
-                    retainContextWhenHidden: true
-                },
+                webviewOptions: { retainContextWhenHidden: true },
                 supportsMultipleEditorsPerDocument: false
             }
         )
     );
 
-    // Command: switch from preview → text editor
+    // Command: preview → text editor
     context.subscriptions.push(
         vscode.commands.registerCommand('adocPreview.openTextEditor', (uri?: vscode.Uri) => {
             const target = uri ?? vscode.window.activeTextEditor?.document.uri
@@ -42,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
-    // Command: switch from text editor → preview
+    // Command: text editor → preview
     context.subscriptions.push(
         vscode.commands.registerCommand('adocPreview.openPreview', () => {
             const uri = vscode.window.activeTextEditor?.document.uri;
