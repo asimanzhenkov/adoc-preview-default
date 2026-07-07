@@ -3,6 +3,7 @@
   "displayName": "AsciiDoc Default Preview",
   "description": "Opens .adoc files in preview by default with an Edit button to switch to text editor",
   "version": "0.1.0",
+  "publisher": "asimanzhenkov",
   "engines": { "vscode": "^1.85.0" },
   "categories": ["Other"],
   "activationEvents": [],
@@ -71,7 +72,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package",
+    "package": "vsce package --no-dependencies",
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
