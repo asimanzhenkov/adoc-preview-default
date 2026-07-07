@@ -41,7 +41,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Package VSIX
-        run: npx vsce package --no-dependencies -o adoc-preview-default-${{ steps.pkg.outputs.version }}.vsix
+        run: npx vsce package -o adoc-preview-default-${{ steps.pkg.outputs.version }}.vsix
 
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4

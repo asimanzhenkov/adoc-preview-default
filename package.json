@@ -72,7 +72,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package --no-dependencies",
+    "package": "vsce package",
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
